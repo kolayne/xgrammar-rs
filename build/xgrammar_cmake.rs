@@ -46,7 +46,10 @@ fn maybe_clear_cmake_build_dir(
     }
 }
 
-pub fn build_xgrammar_cmake(ctx: &BuildContext) -> PathBuf {
+pub fn build_xgrammar_cmake(
+    ctx: &BuildContext,
+    extra_c_cxx_flags: &[&str],
+) -> PathBuf {
     let cmake_build_dir = ctx.out_dir.join("build");
     maybe_clear_cmake_build_dir(&cmake_build_dir, &ctx.xgrammar_src_dir);
     create_dir_all(&cmake_build_dir).ok();
@@ -70,6 +73,11 @@ pub fn build_xgrammar_cmake(ctx: &BuildContext) -> PathBuf {
     cmake_config.define("CMAKE_CXX_EXTENSIONS", "OFF");
 
     cmake_config.define("CMAKE_INTERPROCEDURAL_OPTIMIZATION", "OFF");
+
+    for flag in extra_c_cxx_flags {
+        cmake_config.cflag(flag);
+        cmake_config.cxxflag(flag);
+    }
 
     let is_msvc = ctx.target.contains("msvc");
     if !is_msvc {
